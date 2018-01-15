@@ -1,0 +1,248 @@
+
+;; Quita el valor ya existente en una restriccion de tres celdas en las dos
+;; restantes celdas, en concreto, en las dos últimas
+(defrule quitar-valores-tres-celdas-uno
+  (restriccion (casillas ?i1 ?i2 ?i3))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
+  ?h3 <- (celda (id ?i3) (rango $?v4 ?v1 $?v5))
+  =>
+  (modify ?h2 (rango $?v2 $?v3))
+  (modify ?h3 (rango $?v4 $?v5))
+)
+
+;; Quita el valor ya existente en una restriccion de tres celdas en las dos
+;; restantes celdas, en concreto, en las dos primeras
+(defrule quitar-valores-tres-celdas-dos
+  (restriccion (casillas ?i1 ?i2 ?i3))
+  ?h3 <- (celda (id ?i3) (rango ?v1))
+  ?h1 <- (celda (id ?i1) (rango $?v2 ?v1 $?v3))
+  ?h2 <- (celda (id ?i2) (rango $?v4 ?v1 $?v5))
+  =>
+  (modify ?h1 (rango $?v2 $?v3))
+  (modify ?h2 (rango $?v4 $?v5))
+)
+
+;; Quita el valor ya existente en una restriccion de tres celdas en las dos
+;; restantes celdas, en concreto, las de los extremos
+(defrule quitar-valores-tres-celdas-tres
+  (restriccion (casillas ?i1 ?i2 ?i3))
+  ?h1 <- (celda (id ?i1) (rango $?v2 ?v1 $?v3))
+  ?h2 <- (celda (id ?i2) (rango ?v1))
+  ?h3 <- (celda (id ?i3) (rango $?v4 ?v1 $?v5))
+  =>
+  (modify ?h1 (rango $?v2 $?v3))
+  (modify ?h3 (rango $?v4 $?v5))
+)
+
+(defrule quitar-valor-tres-celdas-cuatro
+  (restriccion (casillas ? ?i1 ?i2))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango ?v2 ?v1))
+  =>
+  (modify ?h2 (rango ?v2))
+)
+
+(defrule quitar-valor-tres-celdas-cinco
+  (restriccion (casillas ?i1 ?i2 ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango ?v2 ?v1))
+  =>
+  (modify ?h2 (rango ?v2))
+)
+
+(defrule quitar-valor-cuatro-celdas-primero-segundo
+  (restriccion (casillas ?i1 ?i2 ? ?))
+  ?h1 <- (celda (id ?i1) (rango ?v))
+  ?h2 <- (celda (id ?i2) (rango $?v1 ?v $?v2))
+  =>
+  (modify ?h2 (rango $?v1 $?v2))
+)
+
+(defrule quitar-valor-cuatro-celdas-tercero-segundo
+  (restriccion (casillas ? ?i2 ?i1 ?))
+  ?h1 <- (celda (id ?i1) (rango ?v))
+  ?h2 <- (celda (id ?i2) (rango $?v1 ?v $?v2))
+  =>
+  (modify ?h2 (rango $?v1 $?v2))
+)
+
+(defrule quitar-valor-cuatro-celdas-cuarto-segundo
+  (restriccion (casillas ? ?i2 ? ?i1))
+  ?h1 <- (celda (id ?i1) (rango ?v))
+  ?h2 <- (celda (id ?i2) (rango $?v1 ?v $?v2))
+  =>
+  (modify ?h2 (rango $?v1 $?v2))
+)
+
+(defrule quitar-valor-cuatro-celdas-cuarto-primero
+  (restriccion (casillas ?i2 ? ? ?i1))
+  ?h1 <- (celda (id ?i1) (rango ?v))
+  ?h2 <- (celda (id ?i2) (rango $?v1 ?v $?v2))
+  =>
+  (modify ?h2 (rango $?v1 $?v2))
+)
+
+(defrule quitar-valor-cuatro-celdas-tercero-primero
+  (restriccion (casillas ?i2 ? ?i1 ?))
+  ?h1 <- (celda (id ?i1) (rango ?v))
+  ?h2 <- (celda (id ?i2) (rango $?v1 ?v $?v2))
+  =>
+  (modify ?h2 (rango $?v1 $?v2))
+)
+
+(defrule quitar-valores-seis-celdas-cuarto
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h4 <- (celda (id ?i4) (rango $?v6 ?v1 $?v7))
+  =>
+  (modify ?h4 (rango $?v6 $?v7))
+)
+
+(defrule quitar-valores-seis-celdas-segundo-tercero
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6))
+  ?h3 <- (celda (id ?i3) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v6 ?v1 $?v7))
+  =>
+  (modify ?h2 (rango $?v6 $?v7))
+)
+
+(defrule quitar-valores-seis-celdas-quinto
+  (restriccion (casillas ? ? ?i1 ? ?i2 ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
+  =>
+  (modify ?h2 (rango $?v2 $?v3))
+)
+
+(defrule quitar-valores-seis-celdas-dos-primeros-cuarto
+  (restriccion (casillas ?i1 ?i2 ? ?i3 ? ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango ?v2))
+  ?h3 <- (celda (id ?i3) (rango ?v3 ?v1 ?v2))
+  =>
+  (modify ?h3 (rango ?v3))
+)
+
+(defrule quitar-valores-seis-celdas-segundo-cuarto
+  (restriccion (casillas ? ?i2 ? ?i1 ? ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
+  =>
+  (modify ?h2 (rango $?v2 $?v3))
+)
+
+(defrule quitar-valores-seis-celdas-cuarto-segundo
+  (restriccion (casillas ? ?i1 ? ?i2 ? ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
+  =>
+  (modify ?h2 (rango $?v2 $?v3))
+)
+
+(defrule quitar-valores-seis-celdas-sexto-cuarto
+  (restriccion (casillas ? ? ? ?i2 ? ?i1))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
+  =>
+  (modify ?h2 (rango $?v2 $?v3))
+)
+
+(defrule quitar-valores-seis-celdas-primero-quinto-al-cuarto
+  (restriccion (casillas ?i1 ? ? ?i2 ?i3 ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango ?v2 ?v3))
+  ?h3 <- (celda (id ?i3) (rango ?v2))
+  =>
+  (modify ?h2 (rango ?v3))
+)
+
+(defrule quitar-valores-seis-celdas-tercero-quinto
+  (restriccion (casillas ? ? ?i1 ? ?i2 ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango ?v2 ?v1))
+  =>
+  (modify ?h2 (rango ?v2))
+)
+
+(defrule quitar-valores-seis-celdas-primero-tercero
+  (restriccion (casillas ?i1 ? ?i2 ? ? ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
+  =>
+  (modify ?h2 (rango $?v2 $?v3))
+)
+
+(defrule quitar-valores-seis-celdas-quinto-tercero
+  (restriccion (casillas ? ? ?i2 ? ?i1 ?))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
+  =>
+  (modify ?h2 (rango $?v2 $?v3))
+)
+
+(defrule quitar-valores-seis-celdas-sexto-segundo
+  (restriccion (casillas ? ?i2 ? ? ? ?i1))
+  ?h1 <- (celda (id ?i1) (rango ?v1))
+  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
+  =>
+  (modify ?h2 (rango $?v2 $?v3))
+)
+
+(defrule quitar-valor-nueve-celdas-uno
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7 ?i8 ?i9))
+  ?h5 <- (celda (id ?i5) (rango ?r1))
+  ?h9 <- (celda (id ?i9) (rango $?r2 ?r1 $?r3))
+  =>
+  (modify ?h9 (rango $?r2 $?r3))
+)
+
+(defrule quitar-valor-nueve-celdas-dos
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7 ?i8 ?i9))
+  ?h8 <- (celda (id ?i8) (rango ?r1))
+  ?h1 <- (celda (id ?i1) (rango $?r4 ?r1 $?r5))
+  ?h4 <- (celda (id ?i4) (rango $?r2 ?r1 $?r3))
+  =>
+  (modify ?h1 (rango $?r4 $?r5))
+  (modify ?h4 (rango $?r2 $?r3))
+)
+
+(defrule quitar-valor-nueve-celdas-tres
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7 ?i8 ?i9))
+  ?h3 <- (celda (id ?i3) (rango $?r2 ?r1 $?r3))
+  ?h4 <- (celda (id ?i4) (rango ?r1))
+  =>
+  (modify ?h3 (rango $?r2 $?r3))
+)
+
+(defrule quitar-valor-nueve-celdas-cuatro
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7 ?i8 ?i9))
+  ?h7 <- (celda (id ?i7) (rango ?r1))
+  ?h8 <- (celda (id ?i8) (rango $?r2 ?r1 $?r3))
+  =>
+  (modify ?h8 (rango $?r2 $?r3))
+)
+
+(defrule quitar-valor-nueve-celdas-cinco
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7 ?i8 ?i9))
+  ?h9 <- (celda (id ?i9) (rango ?r1))
+  ?h5 <- (celda (id ?i5) (rango $?r2 ?r1 $?r3))
+  =>
+  (modify ?h5 (rango $?r2 $?r3))
+)
+
+(defrule quitar-valor-nueve-celdas-seis
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7 ?i8 ?i9))
+  ?h5 <- (celda (id ?i5) (rango ?r1))
+  ?h1 <- (celda (id ?i1) (rango $?r2 ?r1 $?r3))
+  =>
+  (modify ?h1 (rango $?r2 $?r3))
+)
+
+(defrule quitar-valor-nueve-celdas-siete
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7 ?i8 ?i9))
+  ?h1 <- (celda (id ?i1) (rango $?r2 ?r1 $?r3))
+  ?h8 <- (celda (id ?i8) (rango ?r1))
+  =>
+  (modify ?h1 (rango $?r2 $?r3))
+)
