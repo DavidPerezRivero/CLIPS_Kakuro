@@ -239,34 +239,56 @@
 
 ;;;;;;;; La suma igual a 15 en cuatro celdas toma los valores 1, 2, 3, 4 y 5
 (defrule VALORES-INICIALES::cinco-celdas-suma-quince
-  (restriccion (valor 15) (casillas ?id1 ?id2 ?id3 ?id4))
+  (restriccion (valor 15) (casillas ?id1 ?id2 ?id3 ?id4 ?id5))
   ?h1 <- (celda (id ?id1))
   ?h2 <- (celda (id ?id2))
   ?h3 <- (celda (id ?id3))
   ?h4 <- (celda (id ?id4))
-  (exists (celda (id ?id&?id1|?id2|?id3|?id4) (rango 1 2 3 4 5 ? $?)))
+  ?h5 <- (celda (id ?id5))
+  (exists (celda (id ?id&?id1|?id2|?id3|?id4|?id5) (rango 1 2 3 4 5 ? $?)))
   =>
   (modify ?h1 (rango 1 2 3 4 5))
   (modify ?h2 (rango 1 2 3 4 5))
   (modify ?h3 (rango 1 2 3 4 5))
   (modify ?h4 (rango 1 2 3 4 5))
+  (modify ?h5 (rango 1 2 3 4 5))
 )
 
 ;;;;;;;; La suma igual a 16 en cuatro celdas toma los valores 1, 2, 3, 4 y 6
 (defrule VALORES-INICIALES::cinco-celdas-suma-deiciseis
-  (restriccion (valor 15) (casillas ?id1 ?id2 ?id3 ?id4))
+  (restriccion (valor 16) (casillas ?id1 ?id2 ?id3 ?id4 ?id5))
   ?h1 <- (celda (id ?id1))
   ?h2 <- (celda (id ?id2))
   ?h3 <- (celda (id ?id3))
   ?h4 <- (celda (id ?id4))
-  (exists (celda (id ?id&?id1|?id2|?id3|?id4) (rango 1 2 3 4 $? 6 ? $?)))
+  ?h5 <- (celda (id ?id5))
+  (exists (celda (id ?id&?id1|?id2|?id3|?id4|?id5) (rango 1 2 3 4 $? 6 ? $?)))
   =>
   (modify ?h1 (rango 1 2 3 4 6))
   (modify ?h2 (rango 1 2 3 4 6))
   (modify ?h3 (rango 1 2 3 4 6))
   (modify ?h4 (rango 1 2 3 4 6))
+  (modify ?h5 (rango 1 2 3 4 6))
 )
 
+;;;;;;;; La suma igual a 16 en cuatro celdas toma los valores 1, 2, 3, 4, 5 y 6
+(defrule VALORES-INICIALES::seis-celdas-suma-veintiuno
+  (restriccion (valor 21) (casillas ?id1 ?id2 ?id3 ?id4 ?id5 ?id6))
+  ?h1 <- (celda (id ?id1))
+  ?h2 <- (celda (id ?id2))
+  ?h3 <- (celda (id ?id3))
+  ?h4 <- (celda (id ?id4))
+  ?h5 <- (celda (id ?id5))
+  ?h6 <- (celda (id ?id6))
+  (exists (celda (id ?id&?id1|?id2|?id3|?id4|?id5|?id6) (rango 1 2 3 4 5 6 ? $?)))
+  =>
+  (modify ?h1 (rango 1 2 3 4 5 6))
+  (modify ?h2 (rango 1 2 3 4 5 6))
+  (modify ?h3 (rango 1 2 3 4 5 6))
+  (modify ?h4 (rango 1 2 3 4 5 6))
+  (modify ?h5 (rango 1 2 3 4 5 6))
+  (modify ?h6 (rango 1 2 3 4 5 6))
+)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -321,6 +343,34 @@
   (assert (nuevo-valor))
 )
 
+(defrule RESOLVER::completar-restriccion-cinco-celdas
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4 ?i5))
+  ?h1 <- (celda (id ?i6&?i1|?i2|?i3|?i4|?i5) (rango ?v1))
+  ?h2 <- (celda (id ?i7&?i1|?i2|?i3|?i4|?i5) (rango ?v2&~?v1))
+  ?h3 <- (celda (id ?i8&?i1|?i2|?i3|?i4|?i5) (rango ?v3&~?v1&~?v2))
+  ?h4 <- (celda (id ?i9&?i1|?i2|?i3|?i4|?i5) (rango ?v4&~?v1&~?v2&~?v3))
+  ?h5 <- (celda (id ?i10&?i1|?i2|?i3|?i4|?i5)(rango ? ? $?))
+  (test (and (neq ?i6 ?i7) (neq ?i6 ?i8) (neq ?i6 ?i9) (neq ?i6 ?i10)))
+  =>
+  (modify ?h5 (rango (- ?v (+ ?v1 ?v2 ?v3 ?v4))))
+  (assert (nuevo-valor))
+)
+
+(defrule RESOLVER::completar-restriccion-siete-celdas
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7))
+  ?h1 <- (celda (id ?i8&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v1))
+  ?h2 <- (celda (id ?i9&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v2&~?v1))
+  ?h3 <- (celda (id ?i10&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v3&~?v1&~?v2))
+  ?h4 <- (celda (id ?i11&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v4&~?v1&~?v2&~?v3))
+  ?h5 <- (celda (id ?i12&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v5&~?v1&~?v2&~?v3&~?v4))
+  ?h6 <- (celda (id ?i13&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v6&~?v1&~?v2&~?v3&~?v4&~?v5))
+  ?h7 <- (celda (id ?i14&?i1|?i2|?i3|?i4|?i5|?i6|?i7)(rango ? ? $?))
+  (test (and (neq ?i8 ?i9) (neq ?i8 ?i10) (neq ?i8 ?i11) (neq ?i8 ?i12)
+             (neq ?i8 ?i13) (neq ?i8 ?i14)))
+  =>
+  (modify ?h7 (rango (- ?v (+ ?v1 ?v2 ?v3 ?v4 ?v5 ?v6))))
+  (assert (nuevo-valor))
+)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -354,7 +404,7 @@
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-valores-rango-dos-celdas-imposibles-mayor-9
+(defrule ELIMINAR-VALORES::eliminar-valores-rango-dos-celdas-resta-mayor-9
   (restriccion (valor ?v) (casillas ?i1 ?i2))
   ?h <- (celda (id ?i3))
   (or (and (celda (id ?i3&?i1) (rango $?v1 ?r $?v2))
@@ -364,6 +414,20 @@
            (test (> (- ?v ?r) 9))
            (not (celda (id ?i3) (rango ?))))
   )
+  =>
+  (modify ?h (rango $?v1 $?v2))
+  (assert (eliminado))
+)
+
+(defrule ELIMINAR-VALORES::eliminar-valores-rango-cuatro-celdas-resta-mayor-9
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
+  ?h <- (celda (id ?i5))
+  (and (celda (id ?i5&?i1|?i2|?i3|?i4) (rango $?v1 ?r $?v2))
+       (celda (id ?i6&?i1|?i2|?i3|?i4) (rango ? ? $?))
+       (celda (id ?i7&?i1|?i2|?i3|?i4) (rango ?r1))
+       (celda (id ?i8&?i1|?i2|?i3|?i4) (rango ?r2))
+       (test (and (neq ?i5 ?i6) (neq ?i5 ?i7) (neq ?i5 ?i8) (neq ?i7 ?i8)))
+       (test (<= ?v (+ ?r ?r1 ?r2))))
   =>
   (modify ?h (rango $?v1 $?v2))
   (assert (eliminado))
