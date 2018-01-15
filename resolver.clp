@@ -313,51 +313,43 @@
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-valores-rango-dos-celdas-imposibles-mayor-i
-  (restriccion (valor ?v) (casillas ?i ?))
-  ?h <- (celda (id ?i) (rango $?v1 ?r $?v2))
-  (test (> (- ?v ?r) 9))
-  (not (celda (id ?i) (rango ?)))
+(defrule ELIMINAR-VALORES::eliminar-valores-rango-dos-celdas-imposibles-mayor-9
+  (restriccion (valor ?v) (casillas ?i1 ?i2))
+  ?h <- (celda (id ?i3))
+  (or (and (celda (id ?i3&?i1) (rango $?v1 ?r $?v2))
+           (test (> (- ?v ?r) 9))
+           (not (celda (id ?i3) (rango ?))))
+      (and (celda (id ?i3&?i2) (rango $?v1 ?r $?v2))
+           (test (> (- ?v ?r) 9))
+           (not (celda (id ?i3) (rango ?))))
+  )
   =>
   (modify ?h (rango $?v1 $?v2))
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-valores-rango-dos-celdas-imposibles-mayor-d
-  (restriccion (valor ?v) (casillas ? ?i))
-  ?h <- (celda (id ?i) (rango $?v1 ?r $?v2))
-  (test (> (- ?v ?r) 9))
-  (not (celda (id ?i) (rango ?)))
+(defrule ELIMINAR-VALORES::eliminar-valores-rango-dividir-entre-dos
+  (restriccion (valor ?v) (casillas ?i1 ?i2))
+  ?h <- (celda (id ?i3))
+  (or (and (celda (id ?i3&?i1) (rango $?v1 ?r $?v2))
+           (test (eq ?v (* ?r 2))))
+      (and (celda (id ?i3&?i2) (rango $?v1 ?r $?v2))
+           (test (eq ?v (* ?r 2)))))
   =>
   (modify ?h (rango $?v1 $?v2))
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-valores-rango-dos-celdas-dividir-dos-i
-  (restriccion (valor ?v) (casillas ?i ?))
-  ?h <- (celda (id ?i) (rango $?v1 ?r $?v2))
-  (test (eq (/ ?v 2) ?r))
-  =>
-  (modify ?h (rango $?v1 $?v2))
-  (assert (eliminado))
-)
-
-(defrule ELIMINAR-VALORES::eliminar-valor-de-izquierda-en-derecha
+(defrule ELIMINAR-VALORES::eliminar-valor-existente-en-restriccion
   (restriccion (casillas $? ?i1 $? ?i2 $?))
-  ?h1 <- (celda (id ?i1) (rango ?v1))
-  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
-  (not (celda (id ?i2) (rango ?)))
+  (celda (id ?i3) (rango ?v))
+  ?h <- (celda (id ?i4) (rango $?vi ?v $?vd))
+  (or (and (celda (id ?i4&?i1))
+           (celda (id ?i3&?i2)))
+      (and (celda (id ?i4&?i2))
+           (celda (id ?i3&?i1))))
   =>
-  (modify ?h2 (rango $?v2 $?v3))
-  (assert (eliminado))
-)
-
-(defrule ELIMINAR-VALORES::eliminar-valor-de-derecha-en-izquierda
-  (restriccion (casillas $? ?i2 $? ?i1 $?))
-  ?h1 <- (celda (id ?i1) (rango ?v1))
-  ?h2 <- (celda (id ?i2) (rango $?v2 ?v1 $?v3))
-  =>
-  (modify ?h2 (rango $?v2 $?v3))
+  (modify ?h (rango $?vi $?vd))
   (assert (eliminado))
 )
 
@@ -380,7 +372,23 @@
 )
 
 
-
+(defrule ELIMINAR-VALORES::eliminar-sumas-imposibles-dos-celdas
+  (restriccion (valor ?v) (casillas ?i1 ?i2))
+  (celda (id ?i4) (rango ?x ?y))
+  ?h <- (celda (id ?i3&~?i4) (rango $?v1 ?r $?v2))
+  (or (and (celda (id ?i4&?i1))
+           (celda (id ?i3&?i2))
+           (test (neq ?v (+ ?r ?x)))
+           (test (neq ?v (+ ?r ?y))))
+      (and (celda (id ?i4&?i2))
+           (celda (id ?i3&?i1))
+           (test (neq ?v (+ ?r ?x)))
+           (test (neq ?v (+ ?r ?y))))
+  )
+  =>
+  (modify ?h (rango $?v1 $?v2))
+  (assert (eliminado))
+)
 
 
 
