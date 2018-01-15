@@ -207,6 +207,21 @@
   (modify ?h4 (rango 1 2 3 5))
 )
 
+;;;;;;;; La suma igual a 29 en cuatro celdas toma los valores 5, 7, 8 y 9
+(defrule VALORES-INICIALES::cuatro-celdas-suma-veintinueve
+  (restriccion (valor 29) (casillas ?id1 ?id2 ?id3 ?id4))
+  ?h1 <- (celda (id ?id1))
+  ?h2 <- (celda (id ?id2))
+  ?h3 <- (celda (id ?id3))
+  ?h4 <- (celda (id ?id4))
+  (exists (celda (id ?id&?id1|?id2|?id3|?id4) (rango $? ? 5 $? 7 8 9)))
+  =>
+  (modify ?h1 (rango 5 7 8 9))
+  (modify ?h2 (rango 5 7 8 9))
+  (modify ?h3 (rango 5 7 8 9))
+  (modify ?h4 (rango 5 7 8 9))
+)
+
 ;;;;;;;; La suma igual a 30 en cuatro celdas toma los valores 6, 7, 8 y 9
 (defrule VALORES-INICIALES::cuatro-celdas-suma-treinta
   (restriccion (valor 30) (casillas ?id1 ?id2 ?id3 ?id4))
@@ -222,9 +237,35 @@
   (modify ?h4 (rango 6 7 8 9))
 )
 
+;;;;;;;; La suma igual a 15 en cuatro celdas toma los valores 1, 2, 3, 4 y 5
+(defrule VALORES-INICIALES::cinco-celdas-suma-quince
+  (restriccion (valor 15) (casillas ?id1 ?id2 ?id3 ?id4))
+  ?h1 <- (celda (id ?id1))
+  ?h2 <- (celda (id ?id2))
+  ?h3 <- (celda (id ?id3))
+  ?h4 <- (celda (id ?id4))
+  (exists (celda (id ?id&?id1|?id2|?id3|?id4) (rango 1 2 3 4 5 ? $?)))
+  =>
+  (modify ?h1 (rango 1 2 3 4 5))
+  (modify ?h2 (rango 1 2 3 4 5))
+  (modify ?h3 (rango 1 2 3 4 5))
+  (modify ?h4 (rango 1 2 3 4 5))
+)
 
-
-
+;;;;;;;; La suma igual a 16 en cuatro celdas toma los valores 1, 2, 3, 4 y 6
+(defrule VALORES-INICIALES::cinco-celdas-suma-deiciseis
+  (restriccion (valor 15) (casillas ?id1 ?id2 ?id3 ?id4))
+  ?h1 <- (celda (id ?id1))
+  ?h2 <- (celda (id ?id2))
+  ?h3 <- (celda (id ?id3))
+  ?h4 <- (celda (id ?id4))
+  (exists (celda (id ?id&?id1|?id2|?id3|?id4) (rango 1 2 3 4 $? 6 ? $?)))
+  =>
+  (modify ?h1 (rango 1 2 3 4 6))
+  (modify ?h2 (rango 1 2 3 4 6))
+  (modify ?h3 (rango 1 2 3 4 6))
+  (modify ?h4 (rango 1 2 3 4 6))
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
