@@ -30,7 +30,7 @@
 (deftemplate MAIN::prueba
   (slot valor)
   (slot id1)
-  (slot id2)
+  ;;(slot id2)
 )
 
 ;;;   De esta forma, una celda tendrá un valor asignado si y solo si dicho
@@ -304,7 +304,7 @@
 )
 
 (defrule RESOLVER::nuevo-valor
-  (declare (salience -10))
+  (declare (salience 100))
   ?h <- (nuevo-valor)
   =>
   (retract ?h)
@@ -458,25 +458,6 @@
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-valores-rango-dos-celdas-imposibles-no-rango-paso
-  (restriccion (valor ?v) (casillas ?i1 ?i2))
-  ?h1 <- (celda (id ?i1) (rango ?v1 ?v2))
-  ?h2 <- (celda (id ?i2))
-  =>
-  (assert (prueba (valor (- ?v ?v2)) (id1 ?i1) (id2 ?i2)))
-)
-
-(defrule ELIMINAR-VALORES::paso-dos
-  (prueba (valor ?v) (id1 ?i1) (id2 ?i2))
-  ?h1 <- (celda (id ?i1) (rango ?v1 ?v2))
-  ?h2 <- (celda (id ?i2))
-  (not (celda (id ?i2) (rango $? ?v $?)))
-  =>
-  (modify ?h1 (rango ?v1))
-  (assert (eliminado))
-)
-
-
 (defrule ELIMINAR-VALORES::eliminar-sumas-imposibles-dos-celdas
   (restriccion (valor ?v) (casillas ?i1 ?i2))
   (celda (id ?i4) (rango ?x ?y))
@@ -495,11 +476,36 @@
   (assert (eliminado))
 )
 
+(defrule ELIMINAR-VALORES::eliminar-sumas-imposibles-dos-celdas-tres-valores
+  (restriccion (valor ?v) (casillas ?i1 ?i2))
+  ?h1 <- (celda (id ?i1) (rango ? ? ?))
+  ?h2 <- (celda (id ?i2) (rango ?r3 ?r4 ?r5))
+  (celda (id ?i1) (rango $?v1 ?r $?v2))
+  (test (neq ?v (+ ?r ?r3)))
+  (test (neq ?v (+ ?r ?r4)))
+  (test (neq ?v (+ ?r ?r5)))
+  =>
+  (modify ?h1 (rango $?v1 $?v2))
+  (assert (eliminado))
+)
 
-
-
-
-
+(defrule ELIMINAR-VALORES::eliminar-sumas-imposibles-cuatro-cuatro-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3 ?i4))
+  (restriccion (valor ?v2&~?v1) (casillas ?i5 ?i6 ?i7 ?i8))
+  ?h <- (celda (id ?c) (rango $?rc1 ?rc $?rc2))
+  (celda (id ?c&?i5|?i6|?i7|?i8))
+  (celda (id ?c&?i1|?i2|?i3|?i4))
+  (and (celda (id ?c) (rango ? ? $?))
+       (celda (id ?c1&?i5|?i6|?i7|?i8) (rango ?r1))
+       (celda (id ?c2&?i5|?i6|?i7|?i8) (rango ?r2&~?r1))
+       (celda (id ?c3&?i5|?i6|?i7|?i8) (rango ?r3 ?r4))
+       (test (neq ?c3 ?c))
+       (test (neq ?r3 (- ?v2 (+ ?r1 ?r2 ?rc))))
+       (test (neq ?r4 (- ?v2 (+ ?r1 ?r2 ?rc)))))
+  =>
+  (modify ?h (rango $?rc1 $?rc2))
+  (assert (eliminado))
+)
 
 
 
