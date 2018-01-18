@@ -297,14 +297,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmodule RESOLVER (import VALORES-INICIALES ?ALL) (export ?ALL))
 (defrule RESOLVER::no-nuevo-valor
-  (declare (salience -10))
+  (declare (salience -5))
   (no-nuevo-valor)
   =>
   (focus IMPRIMIR)
 )
 
 (defrule RESOLVER::nuevo-valor
-  (declare (salience 100))
+  (declare (salience -5))
   ?h <- (nuevo-valor)
   =>
   (retract ?h)
@@ -371,6 +371,23 @@
   (modify ?h7 (rango (- ?v (+ ?v1 ?v2 ?v3 ?v4 ?v5 ?v6))))
   (assert (nuevo-valor))
 )
+
+(defrule RESOLVER::resolver-intersección-tres-restricciones-cuatro-casillas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
+  (restriccion (valor ?v2) (casillas ?i4 ?i5))
+  (restriccion (valor ?v3&~?v2) (casillas ?i6 ?i7))
+  ?h <- (celda (id ?c&?i1|?i2|?i3) (rango $?r1 ?v $?r2))
+  (celda (id ?c1&?i1|?i2|?i3) (rango ?))
+  (celda (id ?c1&~?c))
+  (celda (id ?c2&?i1|?i2|?i3) (rango $?r1 $?r2))
+  (celda (id ?c2&~?c))
+  (celda (id ?c3&?i4|?i5) (rango $?r1 $?r2))
+  (celda (id ?c4&?i4|?i5) (rango $?r1 $?r2))
+  (celda (id ?c3&~?c4))
+  =>
+  (modify ?h (rango ?v))
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -380,7 +397,7 @@
 (defmodule ELIMINAR-VALORES (import RESOLVER ?ALL) (export ?ALL))
 
 (defrule ELIMINAR-VALORES::eliminado
-  (declare (salience -10))
+  (declare (salience -5))
   ?h <- (eliminado)
   =>
   (retract ?h)
@@ -389,7 +406,7 @@
 )
 
 (defrule ELIMINAR-VALORES::no-eliminado
-  (declare (salience -10))
+  (declare (salience -5))
   (no-eliminado)
   =>
   (focus IMPRIMIR)
@@ -505,6 +522,17 @@
   =>
   (modify ?h (rango $?rc1 $?rc2))
   (assert (eliminado))
+)
+
+(defrule ELIMINAR-VALORES::eliminar-valores-restriccion-18-tres-casillas-con-1
+  (restriccion (valor 18) (casillas ?i1 ?i2 ?i3))
+  (celda (id ?c1&?i1|?i2|?i3) (rango 1))
+  ?h1 <- (celda (id ?c2&?i1|?i2|?i3) (rango ? ? ? $?))
+  ?h2 <- (celda (id ?c3&?i1|?i2|?i3) (rango ? ? $?))
+  (test (neq ?h1 ?h2))
+  =>
+  (modify ?h1 (rango 8 9))
+  (modify ?h2 (rango 8 9))
 )
 
 
