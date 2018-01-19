@@ -55,8 +55,7 @@
 
 (defrule MAIN::pasar-modulo
   =>
-  (focus VALORES-INICIALES ELIMINAR-VALORES)
-)
+  (focus VALORES-INICIALES ELIMINAR-VALORES))
 
 (deffacts inicial
   (no-eliminado)
