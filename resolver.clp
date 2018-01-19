@@ -51,8 +51,7 @@
         (default-dynamic (idRestriccion))
   )
   (slot valor)
-  (multislot casillas)
-)
+  (multislot casillas))
 
 (defrule MAIN::pasar-modulo
   =>
