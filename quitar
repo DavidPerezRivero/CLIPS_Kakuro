@@ -1,3 +1,36 @@
+///////////////////////////// de la parte nueva  /////////////////////////////
+
+
+; (defrule ELIMINAR-VALORES::eliminar-valores-rango-cuatro-celdas-resta-mayor-9
+;   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
+;   ?h <- (celda (id ?i5))
+;   (and (celda (id ?i5&?i1|?i2|?i3|?i4) (rango $?v1 ?r $?v2))
+;        (celda (id ?i6&?i1|?i2|?i3|?i4) (rango ? ? $?))
+;        (celda (id ?i7&?i1|?i2|?i3|?i4) (rango ?r1))
+;        (celda (id ?i8&?i1|?i2|?i3|?i4) (rango ?r2))
+;        (test (and (neq ?i5 ?i6) (neq ?i5 ?i7) (neq ?i5 ?i8) (neq ?i7 ?i8)))
+;        (test (<= ?v (+ ?r ?r1 ?r2))))
+;   =>
+;   (modify ?h (rango $?v1 $?v2))
+;   (assert (eliminado))
+; )
+
+; (defrule RESOLVER::resolver-intersección-tres-restricciones-cuatro-casillas
+;   (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
+;   (restriccion (valor ?v2) (casillas ?i4 ?i5))
+;   (restriccion (valor ?v3&~?v2) (casillas ?i6 ?i7))
+;   ?h <- (celda (id ?c&?i1|?i2|?i3) (rango $?r1 ?v $?r2))
+;   (celda (id ?c1&?i1|?i2|?i3) (rango ?))
+;   (celda (id ?c1&~?c))
+;   (celda (id ?c2&?i1|?i2|?i3) (rango $?r1 $?r2))
+;   (celda (id ?c2&~?c))
+;   (celda (id ?c3&?i4|?i5) (rango $?r1 $?r2))
+;   (celda (id ?c4&?i4|?i5) (rango $?r1 $?r2))
+;   (celda (id ?c3&~?c4))
+;   =>
+;   (modify ?h (rango ?v))
+; )
+///////////////////////////// ///////////////////////////// /////////////////////////////
 
 ;; Quita el valor ya existente en una restriccion de tres celdas en las dos
 ;; restantes celdas, en concreto, en las dos últimas
