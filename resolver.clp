@@ -53,10 +53,6 @@
   (slot valor)
   (multislot casillas))
 
-(deftemplate MAIN::suma-imposible
-  (multislot valores)
-  (multislot casillas))
-
 (defrule MAIN::pasar-modulo
   =>
   (focus VALORES-INICIALES ELIMINAR-VALORES))
@@ -337,7 +333,7 @@
   (modify ?h6 (rango 1 2 3 4 5 7))
 )
 
-;;;;;;;; La suma igual a 16 en cuatro celdas toma los valores 1, 2, 3, 4, 5 y 6
+;;;;;;;; La suma igual a 38 en seis celdas toma los valores 3, 5, 6, 7, 8 y 9
 (defrule VALORES-INICIALES::seis-celdas-suma-38
   (restriccion (valor 38) (casillas ?id1 ?id2 ?id3 ?id4 ?id5 ?id6))
   ?h1 <- (celda (id ?id1))
@@ -356,7 +352,7 @@
   (modify ?h6 (rango 3 5 6 7 8 9))
 )
 
-;;;;;;;; La suma igual a 16 en cuatro celdas toma los valores 1, 2, 3, 4, 5 y 6
+;;;;;;;; La suma igual a 39 en cuatro celdas toma los valores 4, 5, 6, 7, 8 y 9
 (defrule VALORES-INICIALES::seis-celdas-suma-39
   (restriccion (valor 39) (casillas ?id1 ?id2 ?id3 ?id4 ?id5 ?id6))
   ?h1 <- (celda (id ?id1))
@@ -374,10 +370,12 @@
   (modify ?h5 (rango 4 5 6 7 8 9))
   (modify ?h6 (rango 4 5 6 7 8 9))
 )
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;   MODULO   ;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;; RESOLVER ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmodule RESOLVER (import VALORES-INICIALES ?ALL) (export ?ALL))
@@ -411,6 +409,9 @@
   (retract ?restriccion)
 )
 
+;; En restricciones de dos celdas, si las dos celdas tienen unos valores
+;;    comunes y uno distinto que no existe en la otra celda, se asignan esos
+;;    valores a dichas celdas.
 (defrule RESOLVER::resolver-tres-intersecciones-dos-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2))
   ?h1 <- (celda (id ?i1) (rango ?r1 $?r2))
@@ -423,56 +424,7 @@
   (assert (nuevo-valor))
 )
 
-(defrule RESOLVER::resolver-suma-unica-tres-celdas-una-casilla-tres-valores
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
-  ?h1 <- (celda (id ?c1&?i1|?i2|?i3) (rango ?v1 ?v2))
-  ?h2 <- (celda (id ?c2&?i1|?i2|?i3) (rango ?v3 ?v4 ?v5))
-  ?h3 <- (celda (id ?c3&?i1|?i2|?i3) (rango ?v6 ?v7))
-  (test (eq ?v (+ ?v1 ?v5 ?v7))) (test (neq ?v1 ?v5))
-        (test (neq ?v1 ?v7)) (test (neq ?v5 ?v7))
-  (test (neq ?v (+ ?v1 ?v3 ?v6)))
-  (test (neq ?v (+ ?v1 ?v3 ?v7)))
-  (test (neq ?v (+ ?v1 ?v4 ?v6)))
-  (test (neq ?v (+ ?v1 ?v4 ?v7)))
-  (test (neq ?v (+ ?v1 ?v5 ?v6)))
-  (test (neq ?v (+ ?v2 ?v3 ?v6)))
-  (test (neq ?v (+ ?v2 ?v3 ?v7)))
-  (test (neq ?v (+ ?v2 ?v4 ?v6)))
-  (test (neq ?v (+ ?v2 ?v4 ?v7)))
-  (test (neq ?v (+ ?v2 ?v5 ?v6)))
-  (test (neq ?v (+ ?v2 ?v5 ?v7)))
-  =>
-  (modify ?h1 (rango ?v1))
-  (modify ?h2 (rango ?v5))
-  (modify ?h3 (rango ?v7))
-  (assert (nuevo-valor))
-)
-
-(defrule RESOLVER::resolver-suma-unica-tres-celdas-una-casilla-tres-valores-2
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
-  ?h1 <- (celda (id ?c1&?i1|?i2|?i3) (rango ?v1 ?v2))
-  ?h2 <- (celda (id ?c2&?i1|?i2|?i3) (rango ?v3 ?v4 ?v5))
-  ?h3 <- (celda (id ?c3&?i1|?i2|?i3) (rango ?v6 ?v7))
-  (test (neq ?v1 ?v3)) (test (neq ?v1 ?v6)) (test (neq ?v3 ?v6))
-  (test (neq ?v (+ ?v1 ?v5 ?v7)))
-  (test (eq ?v (+ ?v1 ?v3 ?v6)))
-  (test (neq ?v (+ ?v1 ?v3 ?v7)))
-  (test (neq ?v (+ ?v1 ?v4 ?v6)))
-  (test (neq ?v (+ ?v1 ?v4 ?v7)))
-  (test (neq ?v (+ ?v1 ?v5 ?v6)))
-  (test (neq ?v (+ ?v2 ?v3 ?v6)))
-  (test (neq ?v (+ ?v2 ?v3 ?v7)))
-  (test (neq ?v (+ ?v2 ?v4 ?v6)))
-  (test (neq ?v (+ ?v2 ?v4 ?v7)))
-  (test (neq ?v (+ ?v2 ?v5 ?v6)))
-  (test (neq ?v (+ ?v2 ?v5 ?v7)))
-  =>
-  (modify ?h1 (rango ?v1))
-  (modify ?h2 (rango ?v3))
-  (modify ?h3 (rango ?v6))
-  (assert (nuevo-valor))
-)
-
+;; Resuelve restricciones de tres celdas
 (defrule RESOLVER::resolver-suma-unica-tres-celdas
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
   ?h1 <- (celda (id ?i1) (rango ?v1 ?v2))
@@ -495,7 +447,7 @@
   (assert (nuevo-valor))
 )
 
-;; Pone un valor en la intersección de dos restricciones de tres celdas
+;; Resuelve intersecciones de dos restricciones de tres celdas
 (defrule RESOLVER::resuelve-interseccion-tres-tres-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
   (restriccion (valor ?v2) (casillas ?i4 ?i5 ?i6))
@@ -516,6 +468,8 @@
   (assert (nuevo-valor))
 )
 
+;; Resuelve intersecciones de tres restricciones, dos de ellas de tres celas y
+;;    la restante de dos celdas.
 (defrule RESOLVER::resuelve-interseccion-tres-tres-dos-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
   (restriccion (valor ?v2) (casillas ?i4 ?i5 ?i6))
@@ -540,6 +494,8 @@
   (assert (nuevo-valor))
 )
 
+;; Resuelve intersecciones de tres restricciones, una de tres celdas y las otras
+;;    dos restantes restricciones de dos celdas.
 (defrule RESOLVER::resuelve-interseccion-dos-dos-tres-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2))
   (restriccion (valor ?v2) (casillas ?i1 ?i3))
@@ -547,9 +503,8 @@
   ?h1 <- (celda (id ?i1) (rango ?r1 ?r2))
   ?h3 <- (celda (id ?i3) (rango ?r1 ?r2))
   ?h2 <- (celda (id ?i2) (rango ?r3 ?r4))
-  ?h4 <- (celda (id ?i4) (rango ?r5 ? ? ?))
+  ?h4 <- (celda (id ?i4) (rango ?r5 ? $?))
   ?h5 <- (celda (id ?i5) (rango ?r6 ?r7))
-
   (test (eq ?v1 (+ ?r2 ?r1)))
   (test (eq ?v2 (+ ?r2 ?r3)))
   (test (eq ?v3 (+ ?r1 ?r5 ?r6)))
@@ -562,10 +517,13 @@
   (modify ?h5 (rango ?r6))
   (assert (nuevo-valor))
 )
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;   MODULO   ;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;; ELIMINAR ;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;; VALORES ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmodule ELIMINAR-VALORES (import RESOLVER ?ALL) (export ?ALL))
@@ -665,6 +623,8 @@
   (assert (eliminado))
 )
 
+;; Pone un valor en una restriccion de tres celdas ya que de otra forma se
+;;    pasaría el valor de la restricción.
 (defrule ELIMINAR-VALORES::eliminar-valores-rango-suma-imposible-restr-tres-celd
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
   ?h <- (celda (id ?c2&?i1|?i2|?i3) (rango ?r0 ?r))
