@@ -53,6 +53,10 @@
   (slot valor)
   (multislot casillas))
 
+(deftemplate MAIN::suma-imposible
+  (multislot valores)
+  (multislot casillas))
+
 (defrule MAIN::pasar-modulo
   =>
   (focus VALORES-INICIALES ELIMINAR-VALORES))
@@ -295,7 +299,7 @@
   (modify ?h5 (rango 5 6 7 8 9))
 )
 
-;;;;;;;; La suma igual a 16 en cuatro celdas toma los valores 1, 2, 3, 4, 5 y 6
+;;;;;;;; La suma igual a 21 en cuatro celdas toma los valores 1, 2, 3, 4, 5 y 6
 (defrule VALORES-INICIALES::seis-celdas-suma-veintiuno
   (restriccion (valor 21) (casillas ?id1 ?id2 ?id3 ?id4 ?id5 ?id6))
   ?h1 <- (celda (id ?id1))
@@ -312,6 +316,44 @@
   (modify ?h4 (rango 1 2 3 4 5 6))
   (modify ?h5 (rango 1 2 3 4 5 6))
   (modify ?h6 (rango 1 2 3 4 5 6))
+)
+
+;;;;;;;; La suma igual a 22 en cuatro celdas toma los valores 1, 2, 3, 4, 5 y 6
+(defrule VALORES-INICIALES::seis-celdas-suma-veintidos
+  (restriccion (valor 22) (casillas ?id1 ?id2 ?id3 ?id4 ?id5 ?id6))
+  ?h1 <- (celda (id ?id1))
+  ?h2 <- (celda (id ?id2))
+  ?h3 <- (celda (id ?id3))
+  ?h4 <- (celda (id ?id4))
+  ?h5 <- (celda (id ?id5))
+  ?h6 <- (celda (id ?id6))
+  (exists (celda (id ?id&?id1|?id2|?id3|?id4|?id5|?id6) (rango 1 2 3 4 5 ? 7 $?)))
+  =>
+  (modify ?h1 (rango 1 2 3 4 5 7))
+  (modify ?h2 (rango 1 2 3 4 5 7))
+  (modify ?h3 (rango 1 2 3 4 5 7))
+  (modify ?h4 (rango 1 2 3 4 5 7))
+  (modify ?h5 (rango 1 2 3 4 5 7))
+  (modify ?h6 (rango 1 2 3 4 5 7))
+)
+
+;;;;;;;; La suma igual a 16 en cuatro celdas toma los valores 1, 2, 3, 4, 5 y 6
+(defrule VALORES-INICIALES::seis-celdas-suma-38
+  (restriccion (valor 38) (casillas ?id1 ?id2 ?id3 ?id4 ?id5 ?id6))
+  ?h1 <- (celda (id ?id1))
+  ?h2 <- (celda (id ?id2))
+  ?h3 <- (celda (id ?id3))
+  ?h4 <- (celda (id ?id4))
+  ?h5 <- (celda (id ?id5))
+  ?h6 <- (celda (id ?id6))
+  (exists (celda (id ?id&?id1|?id2|?id3|?id4|?id5|?id6) (rango $? 3 ? 5 6 7 8 9)))
+  =>
+  (modify ?h1 (rango 3 5 6 7 8 9))
+  (modify ?h2 (rango 3 5 6 7 8 9))
+  (modify ?h3 (rango 3 5 6 7 8 9))
+  (modify ?h4 (rango 3 5 6 7 8 9))
+  (modify ?h5 (rango 3 5 6 7 8 9))
+  (modify ?h6 (rango 3 5 6 7 8 9))
 )
 
 ;;;;;;;; La suma igual a 16 en cuatro celdas toma los valores 1, 2, 3, 4, 5 y 6
@@ -332,30 +374,6 @@
   (modify ?h5 (rango 4 5 6 7 8 9))
   (modify ?h6 (rango 4 5 6 7 8 9))
 )
-
-(defrule VALORES-INICIALES::eliminar-valores-rango-mayor-que-restriccion
-  (declare (salience -1))
-  (restriccion (valor ?v) (casillas $? ?i $?))
-  ?h <- (celda (id ?i) (rango $?v1 ?v2))
-  (test (>= ?v2 ?v))
-  =>
-  (modify ?h (rango $?v1))
-  (assert (eliminado))
-)
-
-(defrule VALORES-INICIALES::eliminar-valores-rango-dividir-entre-dos
-  (declare (salience -1))
-  (restriccion (valor ?v) (casillas ?i1 ?i2))
-  ?h <- (celda (id ?i3))
-  (or (and (celda (id ?i3&?i1) (rango $?v1 ?r $?v2))
-           (test (eq ?v (* ?r 2))))
-      (and (celda (id ?i3&?i2) (rango $?v1 ?r $?v2))
-           (test (eq ?v (* ?r 2)))))
-  =>
-  (modify ?h (rango $?v1 $?v2))
-  (assert (eliminado))
-)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -379,117 +397,171 @@
   (focus ELIMINAR-VALORES)
 )
 
-(defrule RESOLVER::completar-restriccion-dos-celdas
-  (restriccion (valor ?v) (casillas ?i1 ?i2))
-  (celda (id ?i3&?i1|?i2) (rango ?v1))
-  ?h2 <- (celda (id ?i4&?i1|?i2) (rango ? ? $?))
+;; Completa restricción.
+;; El funcionamiento es el siguiente: Si la restricción tiene una sola casilla
+;;    y el valor de la restricción esta esta en el rango de la celda, completa
+;;    la restricción.
+(defrule RESOLVER::completar-restriccion
+  ?restriccion <- (restriccion (valor ?v) (casillas ?i))
+  ?h <- (celda (id ?i) (rango $?r))
+  (test (member$ ?v $?r))
   =>
-  (modify ?h2 (rango (- ?v ?v1)))
+  (modify ?h (rango ?v))
+  (assert (nuevo-valor))
+  (retract ?restriccion)
+)
+
+(defrule RESOLVER::resolver-tres-intersecciones-dos-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2))
+  ?h1 <- (celda (id ?i1) (rango ?r1 $?r2))
+  ?h2 <- (celda (id ?i2) (rango $?r2 ?r3))
+  (not (celda (id ?i1) (rango ?)))
+  (not (celda (id ?i2) (rango ?)))
+  =>
+  (modify ?h1 (rango ?r1))
+  (modify ?h2 (rango ?r3))
   (assert (nuevo-valor))
 )
 
-(defrule RESOLVER::completar-restriccion-tres-celdas
+(defrule RESOLVER::resolver-suma-unica-tres-celdas-una-casilla-tres-valores
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
-  (celda (id ?i4&?i1|?i2|?i3) (rango ?v1))
-  (celda (id ?i5&?i1|?i2|?i3) (rango ?v2&~?v1))
-  ?h3 <- (celda (id ?i6&?i1|?i2|?i3) (rango ? ? $?))
-  =>
-  (modify ?h3 (rango (- ?v (+ ?v1 ?v2))))
-  (assert (nuevo-valor))
-)
-
-(defrule RESOLVER::completar-restriccion-cuatro-celdas
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
-  (celda (id ?i5&?i1|?i2|?i3|?i4) (rango ?v1))
-  (celda (id ?i6&?i1|?i2|?i3|?i4) (rango ?v2&~?v1))
-  (celda (id ?i7&?i1|?i2|?i3|?i4) (rango ?v3&~?v1&~?v2))
-  ?h4 <- (celda (id ?i8&?i1|?i2|?i3|?i4) (rango ? ? $?))
-  (test (and (neq ?i5 ?i6) (neq ?i5 ?i7) (neq ?i6 ?i7)))
-  =>
-  (modify ?h4 (rango (- ?v (+ ?v1 ?v2 ?v3))))
-  (assert (nuevo-valor))
-)
-
-(defrule RESOLVER::completar-restriccion-cinco-celdas
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4 ?i5))
-  (celda (id ?i6&?i1|?i2|?i3|?i4|?i5) (rango ?v1))
-  (celda (id ?i7&?i1|?i2|?i3|?i4|?i5) (rango ?v2&~?v1))
-  (celda (id ?i8&?i1|?i2|?i3|?i4|?i5) (rango ?v3&~?v1&~?v2))
-  (celda (id ?i9&?i1|?i2|?i3|?i4|?i5) (rango ?v4&~?v1&~?v2&~?v3))
-  ?h5 <- (celda (id ?i10&?i1|?i2|?i3|?i4|?i5)(rango ? ? $?))
-  (test (and (neq ?i6 ?i7) (neq ?i6 ?i8) (neq ?i6 ?i9) (neq ?i6 ?i10)))
-  =>
-  (modify ?h5 (rango (- ?v (+ ?v1 ?v2 ?v3 ?v4))))
-  (assert (nuevo-valor))
-)
-
-(defrule RESOLVER::completar-restriccion-seis-celdas
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6))
-  (celda (id ?i7&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?v1))
-  (celda (id ?i8&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?v2&~?v1))
-  (celda (id ?i9&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?v3&~?v1&~?v2))
-  (celda (id ?i10&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?v4&~?v1&~?v2&~?v3))
-  (celda (id ?i11&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?v5&~?v1&~?v2&~?v3&~?v4))
-  ?h6 <- (celda (id ?i12&?i1|?i2|?i3|?i4|?i5|?i6)(rango ? ? $?))
-  (test (and (neq ?i7 ?i8) (neq ?i7 ?i9) (neq ?i7 ?i10) (neq ?i7 ?i11)
-  (neq ?i7 ?i12)))
-  =>
-  (modify ?h6 (rango (- ?v (+ ?v1 ?v2 ?v3 ?v4 ?v5))))
-  (assert (nuevo-valor))
-)
-
-(defrule RESOLVER::completar-restriccion-siete-celdas
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4 ?i5 ?i6 ?i7))
-  (celda (id ?i8&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v1))
-  (celda (id ?i9&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v2&~?v1))
-  (celda (id ?i10&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v3&~?v1&~?v2))
-  (celda (id ?i11&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v4&~?v1&~?v2&~?v3))
-  (celda (id ?i12&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v5&~?v1&~?v2&~?v3&~?v4))
-  (celda (id ?i13&?i1|?i2|?i3|?i4|?i5|?i6|?i7) (rango ?v6&~?v1&~?v2&~?v3&~?v4&~?v5))
-  ?h7 <- (celda (id ?i14&?i1|?i2|?i3|?i4|?i5|?i6|?i7)(rango ? ? $?))
-  (test (and (neq ?i8 ?i9) (neq ?i8 ?i10) (neq ?i8 ?i11) (neq ?i8 ?i12)
-             (neq ?i8 ?i13) (neq ?i8 ?i14)))
-  =>
-  (modify ?h7 (rango (- ?v (+ ?v1 ?v2 ?v3 ?v4 ?v5 ?v6))))
-  (assert (nuevo-valor))
-)
-
-(defrule RESOLVER::resolver-restriccion-tres-celdas-ningun-valor
-  (declare (salience -1))
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
-  ?h1 <- (celda (id ?i1) (rango ? ?))
-  ?h2 <- (celda (id ?i2) (rango ? ?))
-  ?h3 <- (celda (id ?i3) (rango ? ?))
-  (and (celda (id ?i1) (rango $? ?v1 $?))
-       (celda (id ?i2) (rango $? ?v2 $?))
-       (celda (id ?i3) (rango $? ?v3 $?)))
-  (test (neq ?v1 ?v2))
-  (test (neq ?v2 ?v3))
-  (test (neq ?v1 ?v3))
-  (test (eq ?v (+ ?v1 ?v2 ?v3)))
+  ?h1 <- (celda (id ?c1&?i1|?i2|?i3) (rango ?v1 ?v2))
+  ?h2 <- (celda (id ?c2&?i1|?i2|?i3) (rango ?v3 ?v4 ?v5))
+  ?h3 <- (celda (id ?c3&?i1|?i2|?i3) (rango ?v6 ?v7))
+  (test (eq ?v (+ ?v1 ?v5 ?v7))) (test (neq ?v1 ?v5))
+        (test (neq ?v1 ?v7)) (test (neq ?v5 ?v7))
+  (test (neq ?v (+ ?v1 ?v3 ?v6)))
+  (test (neq ?v (+ ?v1 ?v3 ?v7)))
+  (test (neq ?v (+ ?v1 ?v4 ?v6)))
+  (test (neq ?v (+ ?v1 ?v4 ?v7)))
+  (test (neq ?v (+ ?v1 ?v5 ?v6)))
+  (test (neq ?v (+ ?v2 ?v3 ?v6)))
+  (test (neq ?v (+ ?v2 ?v3 ?v7)))
+  (test (neq ?v (+ ?v2 ?v4 ?v6)))
+  (test (neq ?v (+ ?v2 ?v4 ?v7)))
+  (test (neq ?v (+ ?v2 ?v5 ?v6)))
+  (test (neq ?v (+ ?v2 ?v5 ?v7)))
   =>
   (modify ?h1 (rango ?v1))
-  (modify ?h2 (rango ?v2))
-  (modify ?h3 (rango ?v3))
+  (modify ?h2 (rango ?v5))
+  (modify ?h3 (rango ?v7))
   (assert (nuevo-valor))
 )
 
-(defrule RESOLVER::resolver-suma-imposible-tres-celdas
+(defrule RESOLVER::resolver-suma-unica-tres-celdas-una-casilla-tres-valores-2
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
-  (restriccion (casillas ?i1 ?i4))
-  (restriccion (casillas ?i2 ?i5))
-  (restriccion (casillas ?i3 ?i6))
-  ?h <- (celda (id ?i2) (rango ?r1 ?r2))
-  (celda (id ?i1) (rango ?r3 $?r4))
-  (not (celda (id ?i1) (rango ?)))
-  (celda (id ?i3) (rango $? ?r5 $?))
-  (not (celda (id ?i3) (rango ?)))
-  (test (< ?v (+ ?r2 ?r3 ?r5)))
+  ?h1 <- (celda (id ?c1&?i1|?i2|?i3) (rango ?v1 ?v2))
+  ?h2 <- (celda (id ?c2&?i1|?i2|?i3) (rango ?v3 ?v4 ?v5))
+  ?h3 <- (celda (id ?c3&?i1|?i2|?i3) (rango ?v6 ?v7))
+  (test (neq ?v1 ?v3)) (test (neq ?v1 ?v6)) (test (neq ?v3 ?v6))
+  (test (neq ?v (+ ?v1 ?v5 ?v7)))
+  (test (eq ?v (+ ?v1 ?v3 ?v6)))
+  (test (neq ?v (+ ?v1 ?v3 ?v7)))
+  (test (neq ?v (+ ?v1 ?v4 ?v6)))
+  (test (neq ?v (+ ?v1 ?v4 ?v7)))
+  (test (neq ?v (+ ?v1 ?v5 ?v6)))
+  (test (neq ?v (+ ?v2 ?v3 ?v6)))
+  (test (neq ?v (+ ?v2 ?v3 ?v7)))
+  (test (neq ?v (+ ?v2 ?v4 ?v6)))
+  (test (neq ?v (+ ?v2 ?v4 ?v7)))
+  (test (neq ?v (+ ?v2 ?v5 ?v6)))
+  (test (neq ?v (+ ?v2 ?v5 ?v7)))
   =>
-  (modify ?h (rango ?r1))
+  (modify ?h1 (rango ?v1))
+  (modify ?h2 (rango ?v3))
+  (modify ?h3 (rango ?v6))
   (assert (nuevo-valor))
 )
 
+(defrule RESOLVER::resolver-suma-unica-tres-celdas
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
+  ?h1 <- (celda (id ?i1) (rango ?v1 ?v2))
+  ?h2 <- (celda (id ?i2) (rango ?v3 ?v4))
+  ?h3 <- (celda (id ?i3) (rango ?v5 ?v6))
+  (test (eq ?v (+ ?v1 ?v4 ?v6))) (test (neq ?v1 ?v4)) (test (neq ?v1 ?v6))
+        (test (neq ?v4 ?v6))
+  (test (neq ?v (+ ?v1 ?v3 ?v5)))
+  (test (neq ?v (+ ?v1 ?v3 ?v6)))
+  (test (neq ?v (+ ?v1 ?v4 ?v5)))
+
+  (test (neq ?v (+ ?v2 ?v3 ?v5)))
+  (test (neq ?v (+ ?v2 ?v3 ?v6)))
+  (test (neq ?v (+ ?v2 ?v4 ?v5)))
+  (test (neq ?v (+ ?v2 ?v4 ?v6)))
+  =>
+  (modify ?h1 (rango ?v1))
+  (modify ?h2 (rango ?v4))
+  (modify ?h3 (rango ?v6))
+  (assert (nuevo-valor))
+)
+
+;; Pone un valor en la intersección de dos restricciones de tres celdas
+(defrule RESOLVER::resuelve-interseccion-tres-tres-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
+  (restriccion (valor ?v2) (casillas ?i4 ?i5 ?i6))
+  (test (neq ?v1 ?v2))
+  ?h1 <- (celda (id ?i1) (rango ?r1 ?r2 ?r3))
+  ?h2 <- (celda (id ?i2) (rango ?r1 ?r2 ?r3))
+  ?h3 <- (celda (id ?i3&?i4) (rango ?r1 ?r2 ?r3))
+  ?h4 <- (celda (id ?i5) (rango ? ? ? ?r4))
+  ?h5 <- (celda (id ?i6) (rango ? ? ? ? ?r5))
+  (test (eq ?v1 (+ ?r1 ?r3 ?r2)))
+  (test (eq ?v2 (+ ?r2 ?r4 ?r5)))
+  =>
+  (modify ?h1 (rango ?r1))
+  (modify ?h2 (rango ?r3))
+  (modify ?h3 (rango ?r2))
+  (modify ?h4 (rango ?r4))
+  (modify ?h5 (rango ?r5))
+  (assert (nuevo-valor))
+)
+
+(defrule RESOLVER::resuelve-interseccion-tres-tres-dos-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
+  (restriccion (valor ?v2) (casillas ?i4 ?i5 ?i6))
+  (restriccion (valor ?v3) (casillas ?i1 ?i4))
+  ?h1 <- (celda (id ?i1) (rango ?r1 ?r2))
+  ?h2 <- (celda (id ?i2) (rango ?r3 ?r4))
+  ?h3 <- (celda (id ?i3) (rango ?r5 ?r6))
+  ?h4 <- (celda (id ?i4) (rango ?r1 ?r2))
+  ?h5 <- (celda (id ?i5) (rango ?r3 ?r4))
+  ?h6 <- (celda (id ?i6) (rango ?r5 ?r6))
+  (test (eq ?v1 (+ ?r2 ?r3 ?r6)))
+  (test (eq ?v3 (+ ?r2 ?r1)))
+  (test (eq ?v2 (+ ?r1 ?r4 ?r5)))
+  (test (neq ?v1 ?v2))
+  =>
+  (modify ?h1 (rango ?r2))
+  (modify ?h2 (rango ?r3))
+  (modify ?h3 (rango ?r6))
+  (modify ?h4 (rango ?r1))
+  (modify ?h5 (rango ?r4))
+  (modify ?h6 (rango ?r5))
+  (assert (nuevo-valor))
+)
+
+(defrule RESOLVER::resuelve-interseccion-dos-dos-tres-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2))
+  (restriccion (valor ?v2) (casillas ?i1 ?i3))
+  (restriccion (valor ?v3) (casillas ?i3 ?i4 ?i5))
+  ?h1 <- (celda (id ?i1) (rango ?r1 ?r2))
+  ?h3 <- (celda (id ?i3) (rango ?r1 ?r2))
+  ?h2 <- (celda (id ?i2) (rango ?r3 ?r4))
+  ?h4 <- (celda (id ?i4) (rango ?r5 ? ? ?))
+  ?h5 <- (celda (id ?i5) (rango ?r6 ?r7))
+
+  (test (eq ?v1 (+ ?r2 ?r1)))
+  (test (eq ?v2 (+ ?r2 ?r3)))
+  (test (eq ?v3 (+ ?r1 ?r5 ?r6)))
+  (test (< ?v3 (+ ?r2 ?r5 ?r6)))
+  =>
+  (modify ?h1 (rango ?r2))
+  (modify ?h2 (rango ?r3))
+  (modify ?h3 (rango ?r1))
+  (modify ?h4 (rango ?r5))
+  (modify ?h5 (rango ?r6))
+  (assert (nuevo-valor))
+)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -514,175 +586,133 @@
   (focus IMPRIMIR)
 )
 
-(defrule ELIMINAR-VALORES::eliminar-valores-restriccion-cuatro-valores
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
-  (celda (id ?i1) (rango ?r1))
-  ?h <- (celda (id ?i2) (rango ?r ?r2))
-  (celda (id ?i3) (rango ?r3 ? $?))
-  (celda (id ?i4) (rango ?r4 ? $?))
-  (test (neq ?r2 ?r3))
-  (test (neq ?r3 ?r4))
-  (test (< ?v (+ ?r1 ?r2 ?r4 ?r3)))
-  =>
-  (modify ?h (rango ?r))
-)
-
+;; En restricciones de dos celdas, elimina aquellos valores cuya resta con el
+;;      valor de la restriccion sea mayor que nueve y, por tanto, imposible.
 (defrule ELIMINAR-VALORES::eliminar-valores-rango-dos-celdas-resta-mayor-9
   (restriccion (valor ?v) (casillas ?i1 ?i2))
-  ?h <- (celda (id ?i3))
-  (or (and (celda (id ?i3&?i1) (rango $?v1 ?r $?v2))
-           (test (> (- ?v ?r) 9))
-           (not (celda (id ?i3) (rango ?))))
-      (and (celda (id ?i3&?i2) (rango $?v1 ?r $?v2))
-           (test (> (- ?v ?r) 9))
-           (not (celda (id ?i3) (rango ?))))
-  )
+  ?h <- (celda (id ?i3&?i1|?i2) (rango $?v1 ?r $?v2))
+  (not (celda (id ?i3) (rango ?)))
+  (test (> (- ?v ?r) 9))
   =>
   (modify ?h (rango $?v1 $?v2))
   (assert (eliminado))
 )
 
+;; Elimina, en una restriccion de dos celdas, los valores del rango de una celda
+;;      que sumados con los valores del rango de la otra celda sean todos
+;;      menores al valor de la restriccion
+(defrule ELIMINAR-VALORES::eliminar-valores-rango-menores
+  (restriccion (valor ?v) (casillas ?i1 ?i2))
+  ?h <- (celda (id ?i3&?i1|?i2) (rango ?v1 $?v2))
+  (celda (id ?i4&?i1|?i2) (rango ?v3 ?v4))
+  (not (celda (id ?i3) (rango ?)))
+  (test (neq ?i3 ?i4))
+  (test (< (+ ?v1 ?v3) ?v))
+  (test (< (+ ?v1 ?v4) ?v))
+  =>
+  (modify ?h (rango $?v2))
+  (assert (eliminado))
+)
+
+;; Elimina de las casillas de la misma restriccion el valor de las celdas
+;;      que tienen un solo valor en su rango. (Importante: Alta prioridad.)
+;;      Los motivos de la alta prioridad es que se ejecute antes de eliminar
+;;      una celda de una restriccion y ayuda a la resolución más rápida.
 (defrule ELIMINAR-VALORES::eliminar-valor-existente-en-restriccion
   (declare (salience 100))
   (restriccion (casillas $? ?i1 $? ?i2 $?))
-  (celda (id ?i3) (rango ?v))
-  ?h <- (celda (id ?i4) (rango ? ? $?))
-  (or (and (celda (id ?i4&?i1) (rango $?vi ?v $?vd))
-           (celda (id ?i3&?i2)))
-      (and (celda (id ?i4&?i2) (rango $?vi ?v $?vd))
-           (celda (id ?i3&?i1))))
+  (celda (id ?i3&?i1|?i2) (rango ?v))
+  ?h <- (celda (id ?i4&?i1|?i2) (rango $?vi ?v $?vd))
+  (test (neq ?i3 ?i4))
   =>
   (modify ?h (rango $?vi $?vd))
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-sumas-imposibles-dos-celdas
+;; Elimina los valores del rango de una casilla que sumándose con el menor
+;;      valor del rango de la otra celda superen el valor de la restriccion.
+(defrule ELIMINAR-VALORES::eliminar-suma-imposible-dos-celdas
   (restriccion (valor ?v) (casillas ?i1 ?i2))
-  (celda (id ?i4) (rango ?x ?y))
-  ?h <- (celda (id ?i3&~?i4) (rango $?v1 ?r $?v2))
-  (or (and (celda (id ?i4&?i1))
-           (celda (id ?i3&?i2))
-           (test (neq ?v (+ ?r ?x)))
-           (test (neq ?v (+ ?r ?y))))
-      (and (celda (id ?i4&?i2))
-           (celda (id ?i3&?i1))
-           (test (neq ?v (+ ?r ?x)))
-           (test (neq ?v (+ ?r ?y))))
-  )
+  ?h <- (celda (id ?c1&?i1|?i2) (rango $?vi ?v1 $?vd))
+  (celda (id ?c2&?i1|?i2) (rango ?v2 $?))
+  (test (neq ?c1 ?c2))
+  (test (< ?v (+ ?v1 ?v2)))
+  =>
+  (modify ?h (rango $?vi $?vd))
+  (assert (eliminado))
+)
+
+;; Elimina aquellos valores del rango que sean mayores que el valor de la
+;;      restricción a la que pertenece.
+(defrule ELIMINAR-VALORES::eliminar-valores-rango-mayor-que-restriccion
+  (restriccion (valor ?v) (casillas $? ?i $?))
+  ?h <- (celda (id ?i) (rango $?v1 ?v2))
+  (test (> ?v2 ?v))
+  =>
+  (modify ?h (rango $?v1))
+  (assert (eliminado))
+)
+
+;; Elimina aquellos valores del rango de una casilla que esté en una
+;;      restricción de dos celdas que cumplan que el valor de la restriccion
+;;      entre dos esté en el rango de la celda.
+(defrule ELIMINAR-VALORES::eliminar-valores-rango-dividir-entre-dos
+  (restriccion (valor ?v) (casillas ?i1 ?i2))
+  ?h <- (celda (id ?i3&?i1|?i2) (rango $?v1 ?r $?v2))
+  (test (eq ?v (* ?r 2)))
   =>
   (modify ?h (rango $?v1 $?v2))
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-sumas-imposibles-dos-celdas-tres-valores
-  (restriccion (valor ?v) (casillas ?i1 ?i2))
-  ?h1 <- (celda (id ?i1) (rango ? ? ?))
-  ?h2 <- (celda (id ?i2) (rango ?r3 ?r4 ?r5))
-  (celda (id ?i1) (rango $?v1 ?r $?v2))
-  (test (neq ?v (+ ?r ?r3)))
-  (test (neq ?v (+ ?r ?r4)))
-  (test (neq ?v (+ ?r ?r5)))
-  =>
-  (modify ?h1 (rango $?v1 $?v2))
-  (assert (eliminado))
-)
-
-(defrule ELIMINAR-VALORES::eliminar-sumas-imposibles-cuatro-cuatro-celdas
-  (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3 ?i4))
-  (restriccion (valor ?v2&~?v1) (casillas ?i5 ?i6 ?i7 ?i8))
-  ?h <- (celda (id ?c) (rango $?rc1 ?rc $?rc2))
-  (celda (id ?c&?i5|?i6|?i7|?i8))
-  (celda (id ?c&?i1|?i2|?i3|?i4))
-  (and (celda (id ?c) (rango ? ? $?))
-       (celda (id ?c1&?i5|?i6|?i7|?i8) (rango ?r1))
-       (celda (id ?c2&?i5|?i6|?i7|?i8) (rango ?r2&~?r1))
-       (celda (id ?c3&?i5|?i6|?i7|?i8) (rango ?r3 ?r4))
-       (test (neq ?c3 ?c))
-       (test (neq ?r3 (- ?v2 (+ ?r1 ?r2 ?rc))))
-       (test (neq ?r4 (- ?v2 (+ ?r1 ?r2 ?rc)))))
-  =>
-  (modify ?h (rango $?rc1 $?rc2))
-  (assert (eliminado))
-)
-
-(defrule ELIMINAR-VALORES::eliminar-valores-suma-imposible-cuatro-celdas-2-valores
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
-  (celda (id ?c1&?i1|?i2|?i3|?i4) (rango ?r1))
-  (celda (id ?c2&?i1|?i2|?i3|?i4) (rango ?r2&~?r1))
-  ?h <- (celda (id ?c3&?i1|?i2|?i3|?i4) (rango ?r4 ?r3))
-  (celda (id ?c4&?i1|?i2|?i3|?i4) (rango ?r5&~?r4 ?))
-  (test (< ?v (+ ?r1 ?r2 ?r3 ?r5)))
-  =>
-  (modify ?h (rango ?r4))
-)
-
-(defrule ELIMINAR-VALORES::eliminar-valores-suma-imposible-cinco-celdas-2-valores
-  (declare (salience -2))
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4 ?i5))
-  (celda (id ?c1&?i1|?i2|?i3|?i4|?i5) (rango ?r1))
-  (celda (id ?c2&?i1|?i2|?i3|?i4|?i5) (rango ?r2&~?r1))
-  (celda (id ?c3&?i1|?i2|?i3|?i4|?i5) (rango ?r3&~?r1&~?r2))
-  ?h <- (celda (id ?c4&?i1|?i2|?i3|?i4|?i5) (rango ? ?))
-  (celda (id ?c5&?i1|?i2|?i3|?i4|?i5) (rango ?v2 ?v3 ?v4))
-  (celda (id ?c4) (rango $? ?v1 $?))
-  (test (or (eq ?v (+ ?r1 ?r2 ?r3 ?v1 ?v2))
-            (eq ?v (+ ?r1 ?r2 ?r3 ?v1 ?v3))
-            (eq ?v (+ ?r1 ?r2 ?r3 ?v1 ?v4))))
-  =>
-  (printout t ".........NUEVA........." crlf)
-  (modify ?h (rango ?v1))
-)
-
-(defrule ELIMINAR-VALORES::eliminar-valores-restriccion-tres-celdas-resta-ig-17
+(defrule ELIMINAR-VALORES::eliminar-valores-rango-suma-imposible-restr-tres-celd
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
-  (celda (id ?c1&?i1|?i2|?i3) (rango ?v1))
-  (test (eq 17 (- ?v ?v1)))
-  ?h1 <- (celda (id ?c2&?i1|?i2|?i3) (rango ?v2 ? $?))
-  ?h2 <- (celda (id ?c3&?i1|?i2|?i3) (rango ?v3 ? $?))
-  (test (neq ?v2 ?v3))
-  (test (neq ?v1 ?v2))
-  (test (neq ?v1 ?v3))
+  ?h <- (celda (id ?c2&?i1|?i2|?i3) (rango ?r0 ?r))
+  (celda (id ?c1&?i1|?i2|?i3) (rango ?r1 ?r2))
+  (celda (id ?c3&?i1|?i2|?i3) (rango ?r3 ?r4))
+  (test (eq ?r1 ?r3)) (test (neq ?c1 ?c2))
+  (test (neq ?c1 ?c3)) (test (neq ?c3 ?c2))
+  (test (< ?v (+ ?r ?r1 ?r4)))
   =>
-  (modify ?h1 (rango 8 9))
-  (modify ?h2 (rango 8 9))
+  (modify ?h (rango ?r0))
+  (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-valores-restriccion-17-tres-casillas-con-1
-  (restriccion (valor 17) (casillas ?i1 ?i2 ?i3))
-  (celda (id ?c1&?i1|?i2|?i3) (rango 1))
-  ?h1 <- (celda (id ?c2&?i1|?i2|?i3) (rango ? ? ? $?))
-  ?h2 <- (celda (id ?c3&?i1|?i2|?i3) (rango ? ? $?))
-  (test (neq ?h1 ?h2))
-  =>
-  (modify ?h1 (rango 7 9))
-  (modify ?h2 (rango 7 9))
-)
-
-(defrule ELIMINAR-VALORES::eliminar-valores-restriccion-13-tres-casillas-con-9
-  (restriccion (valor 13) (casillas ?i1 ?i2 ?i3))
-  (celda (id ?c1&?i1|?i2|?i3) (rango 9))
-  ?h1 <- (celda (id ?c2&?i1|?i2|?i3) (rango ? ?v1 $?))
-  ?h2 <- (celda (id ?c3&?i1|?i2|?i3) (rango ? ?v2 $?))
-  (test (neq ?h1 ?h2))
+;; Pone un valor en la intersección de dos restricciones de tres celdas
+(defrule ELIMINAR-VALORES::eliminar-valores-interseccion-tres-tres-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
+  (restriccion (valor ?v2) (casillas ?i4 ?i5 ?i6))
+  ?h <- (celda (id ?i2&?i6) (rango ?r1 ?r2))
+  (celda (id ?i4) (rango ?r3 ?r4))
+  (celda (id ?i5) (rango ?r5 ?r6 ?r7))
+  (test (eq ?v2 (+ ?r3 ?r6 ?r1)))
   (test (neq ?v1 ?v2))
   =>
-  (modify ?h1 (rango 1 3))
-  (modify ?h2 (rango 1 3))
+  (modify ?h (rango ?r1))
+  (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::eliminar-valores-restriccion-11-cuatro-casillas-2
-  (restriccion (valor 11) (casillas ?i1 ?i2 ?i3 ?i4))
-  (restriccion (valor 4) (casillas ?i5 ?i6))
-  ?h1 <- (celda (id ?c0&?i1|?i2|?i3|?i4))
-  ?h2 <- (celda (id ?c2&~?i1|?i2|?i3|?i4))
-  (celda (id ?c0&?i5|?i6) (rango ? ?))
-  (celda (id ?c2&?i5|?i6) (rango ? ?))
-  (celda (id ?c1&?i1|?i2|?i3|?i4) (rango 2))
+;; Elimina una celda que ya tenga un único valor de la restriccion a la cual
+;;      pertenece.
+(defrule ELIMINAR-VALORES::eliminar-celda-restriccion
+  (declare (salience 2))
+  ?h <- (restriccion (id ?i) (valor ?v) (casillas $?casillas))
+  (celda (id ?c) (rango ?r))
+  (test (member$ ?c $?casillas))
   =>
-  (modify ?h1 (rango 3))
-  (modify ?h2 (rango 1))
+  (modify ?h (valor (- ?v ?r)) (casillas (delete$ $?casillas
+      (member$ ?c $?casillas) (member$ ?c $?casillas))))
+  (assert (eliminado))
+  (focus VALORES-INICIALES)
 )
 
+;; Elimina una restriccion cuyo valor es cero, lo cual significa que ya no
+;;      tiene casillas que resolver.
+(defrule ELIMINAR-VALORES::eliminar-restriccion
+  ?h <- (restriccion (valor 0))
+  =>
+  (retract ?h)
+)
 ;;;============================================================================
 ;;; Reglas para imprimir el resultado
 ;;;============================================================================
