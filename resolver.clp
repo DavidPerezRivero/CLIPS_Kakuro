@@ -412,7 +412,7 @@
 ;; En restricciones de dos celdas, si las dos celdas tienen unos valores
 ;;    comunes y uno distinto que no existe en la otra celda, se asignan esos
 ;;    valores a dichas celdas.
-(defrule RESOLVER::resolver-tres-intersecciones-dos-celdas
+(defrule RESOLVER::resolver-restriccion-dos-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2))
   ?h1 <- (celda (id ?i1) (rango ?r1 $?r2))
   ?h2 <- (celda (id ?i2) (rango $?r2 ?r3))
@@ -518,7 +518,18 @@
   (assert (nuevo-valor))
 )
 
+(defrule RESOLVER::resuelve-interseccion-tres-restricciones-dos-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2)) ;; 3
+  (restriccion (valor ?v2) (casillas ?i2 ?i3)) ;; 10
+  (restriccion (valor ?v3) (casillas ?i4 ?i3)) ;; 17
 
+  (celda (id ?i1) (rango ?r1 ?r2))
+  (celda (id ?i2) (rango ?r1 ?r2))
+  (celda (id ?i3) (rango ?r3 ?r4))
+  (celda (id ?i4) (rango ?r3 ?r4))
+  =>
+
+)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;   MODULO   ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -623,6 +634,48 @@
   (assert (eliminado))
 )
 
+;; Elimina de una celda(A) perteneciente a una restriccion de tres celdas, todos
+;;    los valores excepto el que contiene A que no están en las dos restantes.
+(defrule ELIMINAR-VALORES::eliminar-valores-restriccion-tres-celdas-unico
+  (restriccion (casillas ?i1 ?i2 ?i3))
+  ?h <- (celda (id ?c1&?i1|?i2|?i3) (rango ?v $?r))
+  (celda (id ?c2&?i1|?i2|?i3) (rango $?r))
+  (celda (id ?c3&?i1|?i2|?i3) (rango $?r))
+  (test (neq ?c1 ?c2)) (test (neq ?c1 ?c3)) (test (neq ?c3 ?c2))
+  =>
+  (modify ?h (rango ?v))
+  (assert (eliminado))
+)
+
+;; Elimina el valor más pequeño de una celda perteneciente a una restriccion
+;;    de tres celdas, que hace imposible alcanzar el valor de la restriccion.
+(defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-menor-tres-celdas-rest
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
+  ?h <- (celda (id ?i3) (rango ?r1 $?r))
+  (celda (id ?i2) (rango $? ? ?r2))
+  (celda (id ?i1) (rango $? ? ?r3))
+  (test (> ?v (+ ?r1 ?r2 ?r3)))
+  =>
+  (modify ?h (rango $?r))
+  (assert (eliminado))
+)
+
+;; Elimina el mayor valor de una celda perteneciente a una restriccion
+;;    de tres celdas, que supera el valor de la restriccion aún sumándose con
+;;    los valores más pequeños de las restantes casillas
+(defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-mayor-cuatro-celdas
+  (declare (salience -3))
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
+  ?h <- (celda (id ?i1) (rango $?r ?r1))
+  (celda (id ?i2) (rango ?r2 ?r3 $?))
+  (celda (id ?i3) (rango ?r2 ?r3 $?))
+  (celda (id ?i4) (rango ?r3 ?r4 $?))
+  (test (< ?v (+ ?r1 ?r2 ?r3 ?r4)))
+  =>
+  (modify ?h (rango $?r))
+  (assert (eliminado))
+)
+
 ;; Pone un valor en una restriccion de tres celdas ya que de otra forma se
 ;;    pasaría el valor de la restricción.
 (defrule ELIMINAR-VALORES::eliminar-valores-rango-suma-imposible-restr-tres-celd
@@ -647,6 +700,25 @@
   (celda (id ?i5) (rango ?r5 ?r6 ?r7))
   (test (eq ?v2 (+ ?r3 ?r6 ?r1)))
   (test (neq ?v1 ?v2))
+  =>
+  (modify ?h (rango ?r1))
+  (assert (eliminado))
+)
+
+;; Elimina un valor imposible en la interseccion de dos restricciones, una de
+;;    dos celdas y otra de tres celdas
+(defrule ELIMINAR-VALORES::eliminar-valores-interseccion-tres-dos-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
+  (restriccion (valor ?v2) (casillas ?i1 ?i4))
+  ?h <- (celda (id ?i1) (rango ?r1 ?r2))
+  (celda (id ?i2) (rango ?r3 ?r4 ?r5))
+  (celda (id ?i3) (rango ?r6 ?r7))
+  (celda (id ?i4) (rango ?r1 ?r2))
+  (test (eq ?v1 (+ ?r1 ?r5 ?r7)))
+  (test (eq ?r1 ?r3)) (test (eq ?r1 ?r6)) (test (eq ?r4 ?r7))
+  (test (neq ?v1 (+ ?r2 ?r4 ?r6)))
+  (test (neq ?v1 (+ ?r2 ?r5 ?r6)))
+  (test (neq ?v1 (+ ?r2 ?r5 ?r7)))
   =>
   (modify ?h (rango ?r1))
   (assert (eliminado))
