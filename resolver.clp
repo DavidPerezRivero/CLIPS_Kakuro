@@ -660,9 +660,13 @@
   (assert (eliminado))
 )
 
-;; Elimina el mayor valor de una celda perteneciente a una restriccion
-;;    de tres celdas, que supera el valor de la restriccion aún sumándose con
-;;    los valores más pequeños de las restantes casillas
+;; Elimina el menor valor del rango de la primera celda que, al sumarse con los
+;;    mayores valores de los rangos de las demas celdas, den como resultado el
+;;    valor de la restriccion pero hay valor repetido.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-menor-cuatro-celdas
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
   ?h <- (celda (id ?i1) (rango ?r1 $?r))
@@ -677,6 +681,42 @@
   (test (eq ?v (+ ?r1 ?r2 ?r3 ?r4)))
   =>
   (modify ?h (rango $?r))
+  (assert (eliminado))
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-mayor-cuatro-celdas
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
+  ?h <- (celda (id ?i1) (rango $?r ?r1))
+  (celda (id ?i2) (rango ?r2 $?))
+  (celda (id ?i3) (rango ?r3 $?))
+  (celda (id ?i4) (rango ?r3  ?r5 $?))
+  (not (celda (id ?i1) (rango ?)))
+  (not (celda (id ?i2) (rango ?)))
+  (not (celda (id ?i3) (rango ?)))
+  (not (celda (id ?i4) (rango ?)))
+  (test (< ?v (+ ?r1 ?r2 ?r3 ?r5)))
+  =>
+  (modify ?h (rango $?r))
+  (assert (eliminado))
+)
+
+(defrule ELIMINAR-VALORES::elimina-valores-restriccion-cinco-celdas-unico
+  (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5))
+  ?h <- (celda (id ?c1&?i1|?i2|?i3|?i4|?i5) (rango ?r $?r1 $?r2))
+  (celda (id ?c2&?i1|?i2|?i3|?i4|?i5) (rango $?r1 $?r2))
+  (celda (id ?c3&?i1|?i2|?i3|?i4|?i5) (rango $?r1))
+  (celda (id ?c4&?i1|?i2|?i3|?i4|?i5) (rango $?r2))
+  (celda (id ?c5&?i1|?i2|?i3|?i4|?i5) (rango $?r2))
+  (test (neq ?c1 ?c2)) (test (neq ?c1 ?c3)) (test (neq ?c1 ?c4))
+  (test (neq ?c1 ?c5)) (test (neq ?c2 ?c3)) (test (neq ?c2 ?c4))
+  (test (neq ?c2 ?c5)) (test (neq ?c3 ?c4)) (test (neq ?c3 ?c5))
+  (test (neq ?c4 ?c5))
+  =>
+  (modify ?h (rango ?r))
   (assert (eliminado))
 )
 
