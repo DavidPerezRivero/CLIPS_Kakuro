@@ -663,14 +663,18 @@
 ;; Elimina el mayor valor de una celda perteneciente a una restriccion
 ;;    de tres celdas, que supera el valor de la restriccion aún sumándose con
 ;;    los valores más pequeños de las restantes casillas
-(defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-mayor-cuatro-celdas
-  (declare (salience -3))
+(defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-menor-cuatro-celdas
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
-  ?h <- (celda (id ?i1) (rango $?r ?r1))
-  (celda (id ?i2) (rango ?r2 ?r3 $?))
-  (celda (id ?i3) (rango ?r2 ?r3 $?))
-  (celda (id ?i4) (rango ?r3 ?r4 $?))
-  (test (< ?v (+ ?r1 ?r2 ?r3 ?r4)))
+  ?h <- (celda (id ?i1) (rango ?r1 $?r))
+  (celda (id ?i2) (rango $? ?r2))
+  (celda (id ?i3) (rango $? ?r3))
+  (celda (id ?i4) (rango $? ?r4))
+  (not (celda (id ?i1) (rango ?)))
+  (not (celda (id ?i2) (rango ?)))
+  (not (celda (id ?i3) (rango ?)))
+  (not (celda (id ?i4) (rango ?)))
+  (test (eq ?r1 ?r4))
+  (test (eq ?v (+ ?r1 ?r2 ?r3 ?r4)))
   =>
   (modify ?h (rango $?r))
   (assert (eliminado))
