@@ -29,7 +29,7 @@
 29 -> FALLO
 30 -> P
 31 -> P (controlar)
-32 -> P (controlar)
+32 -> P
 33 -> FALLO
 34 -> P (controlar)
 35 -> FALLO

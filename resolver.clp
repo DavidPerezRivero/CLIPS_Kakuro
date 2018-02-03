@@ -412,10 +412,6 @@
 ;; En restricciones de dos celdas, si las dos celdas tienen unos valores
 ;;    comunes y uno distinto que no existe en la otra celda, se asignan esos
 ;;    valores a dichas celdas.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule RESOLVER::resolver-restriccion-dos-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2))
   ?h1 <- (celda (id ?i1) (rango ?r1 $?r2))
@@ -516,15 +512,11 @@
   (restriccion (valor ?v1) (casillas ?i1 ?i2))
   (restriccion (valor ?v2) (casillas ?i1 ?i3))
   (restriccion (valor ?v3) (casillas ?i3 ?i4 ?i5))
-  ?h1 <- (celda (id ?c1&?i1|?i2|?i3|?i4|?i5) (rango ?r1 ?r2))
-  ?h3 <- (celda (id ?c3&?i1|?i2|?i3|?i4|?i5) (rango ?r1 ?r2))
-  ?h2 <- (celda (id ?c2&?i1|?i2|?i3|?i4|?i5) (rango ?r3 ?r4))
-  ?h4 <- (celda (id ?c4&?i1|?i2|?i3|?i4|?i5) (rango ?r5 ? $?))
-  ?h5 <- (celda (id ?c5&?i1|?i2|?i3|?i4|?i5) (rango ?r6 ?r7))
-  (test (neq ?c1 ?c2)) (test (neq ?c1 ?c3)) (test (neq ?c1 ?c4))
-  (test (neq ?c1 ?c5)) (test (neq ?c2 ?c3)) (test (neq ?c2 ?c4))
-  (test (neq ?c5 ?c2)) (test (neq ?c3 ?c4)) (test (neq ?c3 ?c5))
-  (test (neq ?c4 ?c5))
+  ?h1 <- (celda (id ?i1) (rango ?r1 ?r2))
+  ?h3 <- (celda (id ?i3) (rango ?r1 ?r2))
+  ?h2 <- (celda (id ?i2) (rango ?r3 ?r4))
+  ?h4 <- (celda (id ?i4) (rango ?r5 ? $?))
+  ?h5 <- (celda (id ?i5) (rango ?r6 ?r7))
   (test (eq ?v1 (+ ?r2 ?r1)))
   (test (eq ?v2 (+ ?r2 ?r3)))
   (test (eq ?v3 (+ ?r1 ?r5 ?r6)))
@@ -543,17 +535,13 @@
   (restriccion (valor ?v1) (casillas ?i1 ?i2))
   (restriccion (valor ?v2) (casillas ?i1 ?i3))
   (restriccion (valor ?v3) (casillas ?i3 ?i4))
-  (restriccion (valor ?v4) (casillas ?i2 ?i4 ?i5 ?i6)) 
-  ?h1 <- (celda (id ?c1&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?r1 ?r2))
-  ?h2 <- (celda (id ?c2&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?r1 ?r2))
-  ?h3 <- (celda (id ?c3&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?r3 ?r4))
-  ?h4 <- (celda (id ?c4&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?r3 ?r4))
-  ?h5 <- (celda (id ?c5&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?r5 ?r1 ?r2))
-  ?h6 <- (celda (id ?c6&?i1|?i2|?i3|?i4|?i5|?i6) (rango ?r1 ?r2))
-  (test (neq ?c1 ?c2)) (test (neq ?c1 ?c3)) (test (neq ?c1 ?c4))
-  (test (neq ?c1 ?c6)) (test (neq ?c2 ?c3)) (test (neq ?c2 ?c4))
-  (test (neq ?c2 ?c6)) (test (neq ?c3 ?c4)) (test (neq ?c3 ?c6))
-  (test (neq ?c4 ?c6))
+  (restriccion (valor ?v4) (casillas ?i2 ?i4 ?i5 ?i6))
+  ?h1 <- (celda (id ?i1) (rango ?r1 ?r2))
+  ?h2 <- (celda (id ?i2) (rango ?r1 ?r2))
+  ?h3 <- (celda (id ?i3) (rango ?r3 ?r4))
+  ?h4 <- (celda (id ?i4) (rango ?r3 ?r4))
+  ?h5 <- (celda (id ?i5) (rango ?r5 ?r1 ?r2))
+  ?h6 <- (celda (id ?i6) (rango ?r1 ?r2))
   (test (eq ?v4 (+ ?r1 ?r4 ?r5 ?r2)))
   (test (neq ?v4 (+ ?r2 ?r3 ?r5 ?r4)))
   =>
