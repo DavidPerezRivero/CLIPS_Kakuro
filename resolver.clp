@@ -702,20 +702,44 @@
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::elimina-valor-restriccion-cuatro-celdas-sum-imposible
+(defrule ELIMINAR-VALORES::elimina-valor-restriccion-cuatro-celdas-sum-imp-1
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
-  ?h <- (celda (id ?i4) (rango $?r ?r1))
-  (celda (id ?i3) (rango ?r1 ?r2))
-  (celda (id ?c&?i1|?i2) (rango ?r3 $?))
+  ?h <- (celda (id ?c4&?i1|?i2|?i3|?i4) (rango $?r ?r1))
+  (celda (id ?c3&?i1|?i2|?i3|?i4) (rango ?r1 ?r2))
+  (celda (id ?c&?i1|?i2|?i3|?i4) (rango ?r3 $?))
   (test (eq ?r3 (- ?v (+ ?r1 ?r2))))
   =>
   (modify ?h (rango $?r))
   (assert (eliminado))
 )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule ELIMINAR-VALORES::elimina-valor-restriccion-cuatro-celdas-sum-imp-2
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
+  ?h <- (celda (id ?i1) (rango ?r1  $?r))
+  (celda (id ?i4) (rango ?r1 ?r2))
+  (celda (id ?i2) (rango ?r3 $?))
+  (celda (id ?i3) (rango ?r4 $?))
+  (test (< ?v (+ ?r1 ?r2 ?r3 ?r4)))
+  =>
+  (modify ?h (rango $?r))
+  (assert (eliminado))
+)
+
+(defrule ELIMINAR-VALORES::elimina-valor-interseccion-dos-dos-dos-tres-celdas
+  (restriccion (valor ?v1) (casillas ?i1 ?i2))
+  (restriccion (valor ?v2) (casillas ?i3 ?i4))
+  (restriccion (valor ?v3) (casillas ?i2 ?i4))
+  ?h <- (celda (id ?i1) (rango ?r1 ?r2))
+  (celda (id ?i2) (rango ?r3 ?r4))
+  (celda (id ?i3) (rango ?r2 ?r5))
+  (celda (id ?i4) (rango ?r3 ?r4))
+  (test (eq ?v1 (+ ?r2 ?r3)))
+  (test (eq ?v3 (+ ?r3 ?r4)))
+  (test (eq ?r2 (- ?v2 ?r4)))
+  =>
+  (modify ?h (rango ?r1))
+)
+
 (defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-mayor-cuatro-celdas
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
   ?h <- (celda (id ?i1) (rango $?r ?r1))
