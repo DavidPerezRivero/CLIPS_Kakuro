@@ -18,7 +18,7 @@
 18 -> P
 19 -> P
 20 -> P
-21 -> P (controlar)
+21 -> P
 22 -> P
 23 -> P
 24 -> P
@@ -28,10 +28,10 @@
 28 -> P
 29 -> FALLO
 30 -> P
-31 -> P (controlar)
+31 -> P
 32 -> P
-33 -> FALLO
-34 -> P (controlar)
+33 -> P
+34 -> P
 35 -> FALLO
 36 -> FALLO
 37 -> FALLO

@@ -702,6 +702,16 @@
   (assert (eliminado))
 )
 
+(defrule ELIMINAR-VALORES::elimina-valor-restriccion-cuatro-celdas-sum-imposible
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
+  ?h <- (celda (id ?i4) (rango $?r ?r1))
+  (celda (id ?i3) (rango ?r1 ?r2))
+  (celda (id ?c&?i1|?i2) (rango ?r3 $?))
+  (test (eq ?r3 (- ?v (+ ?r1 ?r2))))
+  =>
+  (modify ?h (rango $?r))
+  (assert (eliminado))
+)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
