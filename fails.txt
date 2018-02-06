@@ -39,8 +39,8 @@
 39 -> FALLO
 40 -> P
 41 -> P
-42 -> FALLO
-43 ->  P
+42 -> P
+43 -> P
 44 -> FALLO
 45 -> FALLO
 46 -> FALLO

@@ -57,7 +57,7 @@
   =>
   (focus VALORES-INICIALES ELIMINAR-VALORES))
 
-(deffacts inicial
+(deffacts MAIN::inicial
   (no-eliminado)
 )
 
@@ -425,10 +425,6 @@
 )
 
 ;; Resuelve restricciones de tres celdas
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule RESOLVER::resolver-suma-unica-tres-celdas
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
   ?h1 <- (celda (id ?i1) (rango ?v1 ?v2))
@@ -452,10 +448,6 @@
 )
 
 ;; Resuelve intersecciones de dos restricciones de tres celdas
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule RESOLVER::resuelve-interseccion-tres-tres-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
   (restriccion (valor ?v2) (casillas ?i4 ?i5 ?i6))
@@ -478,10 +470,6 @@
 
 ;; Resuelve intersecciones de tres restricciones, dos de ellas de tres celas y
 ;;    la restante de dos celdas.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule RESOLVER::resuelve-interseccion-tres-tres-dos-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2 ?i3))
   (restriccion (valor ?v2) (casillas ?i4 ?i5 ?i6))
@@ -531,7 +519,7 @@
 )
 
 ;; Resuelve interseccion de tres restricciones de dos celdas y una de cuatro
-(defrule RESOLVER::regla-para-ejemplo-25
+(defrule RESOLVER::resuelve-interseccion-dos-dos-dos-cuatro
   (restriccion (valor ?v1) (casillas ?i1 ?i2))
   (restriccion (valor ?v2) (casillas ?i1 ?i3))
   (restriccion (valor ?v3) (casillas ?i3 ?i4))
@@ -551,6 +539,27 @@
   (modify ?h6 (rango ?r2))
   (modify ?h1 (rango ?r2))
   (modify ?h3 (rango ?r3))
+  (assert (nuevo-valor))
+)
+
+(defrule RESOLVER::resuelve-interseccion-cuadrado
+  (restriccion (valor ?v1) (casillas ?i1 ?i2))
+  (restriccion (valor ?v2) (casillas ?i1 ?i3))
+  (restriccion (valor ?v3) (casillas ?i2 ?i4))
+  ?h1 <- (celda (id ?i1) (rango ?r1 ?r2))
+  ?h2 <- (celda (id ?i2) (rango ?r1 ?r2))
+  ?h3 <- (celda (id ?i3) (rango ?r3 ?r4))
+  ?h4 <- (celda (id ?i4) (rango ?r5 ?r6))
+  (test (eq ?v2 (+ ?r1 ?r4)))
+  (test (eq ?v3 (+ ?r2 ?r5)))
+  (test (eq ?r4 ?r5))
+  (test (eq ?v2 (+ ?r2 ?r3)))
+  (test (eq ?v3 (+ ?r1 ?r6)))
+  =>
+  (modify ?h1 (rango ?r2))
+  (modify ?h2 (rango ?r1))
+  (modify ?h3 (rango ?r3))
+  (modify ?h4 (rango ?r6))
   (assert (nuevo-valor))
 )
 
@@ -660,10 +669,6 @@
 
 ;; Elimina el valor más pequeño de una celda perteneciente a una restriccion
 ;;    de tres celdas, que hace imposible alcanzar el valor de la restriccion.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Modificar para hacerla mas general
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-menor-tres-celdas-rest
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3))
   ?h <- (celda (id ?i3) (rango ?r1 $?r))
@@ -702,6 +707,7 @@
   (assert (eliminado))
 )
 
+;; Elimina un valor de una casilla perteneciente a una restriccion de cuatro celdas
 (defrule ELIMINAR-VALORES::elimina-valor-restriccion-cuatro-celdas-sum-imp-1
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
   ?h <- (celda (id ?c4&?i1|?i2|?i3|?i4) (rango $?r ?r1))
@@ -713,19 +719,9 @@
   (assert (eliminado))
 )
 
-(defrule ELIMINAR-VALORES::elimina-valor-restriccion-cuatro-celdas-sum-imp-2
-  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
-  ?h <- (celda (id ?i1) (rango ?r1  $?r))
-  (celda (id ?i4) (rango ?r1 ?r2))
-  (celda (id ?i2) (rango ?r3 $?))
-  (celda (id ?i3) (rango ?r4 $?))
-  (test (< ?v (+ ?r1 ?r2 ?r3 ?r4)))
-  =>
-  (modify ?h (rango $?r))
-  (assert (eliminado))
-)
-
-(defrule ELIMINAR-VALORES::elimina-valor-interseccion-dos-dos-dos-tres-celdas
+;; Establece un valor en una casilla involucrada en una interseccion de tres
+;;    restricciones de dos celdas cada una
+(defrule ELIMINAR-VALORES::elimina-valor-interseccion-dos-dos-dos-celdas
   (restriccion (valor ?v1) (casillas ?i1 ?i2))
   (restriccion (valor ?v2) (casillas ?i3 ?i4))
   (restriccion (valor ?v3) (casillas ?i2 ?i4))
@@ -740,6 +736,20 @@
   (modify ?h (rango ?r1))
 )
 
+;; Elimina un valor de una casilla perteneciente a una restriccion de cuatro celdas
+(defrule ELIMINAR-VALORES::elimina-valor-restriccion-cuatro-celdas-sum-imp-2
+  (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
+  ?h <- (celda (id ?i1) (rango ?r1  $?r))
+  (celda (id ?i4) (rango ?r1 ?r2))
+  (celda (id ?i2) (rango ?r3 $?))
+  (celda (id ?i3) (rango ?r4 $?))
+  (test (< ?v (+ ?r1 ?r2 ?r3 ?r4)))
+  =>
+  (modify ?h (rango $?r))
+  (assert (eliminado))
+)
+
+;; Elimina un valor de una celda perteneciente a una restriccion de cuatro celdas
 (defrule ELIMINAR-VALORES::elimina-valores-suma-imposible-mayor-cuatro-celdas
   (restriccion (valor ?v) (casillas ?i1 ?i2 ?i3 ?i4))
   ?h <- (celda (id ?i1) (rango $?r ?r1))
@@ -756,7 +766,7 @@
   (assert (eliminado))
 )
 
-
+;;  Elimina un valor de una celda perteneciente a una restriccion de cinco celdas
 (defrule ELIMINAR-VALORES::elimina-valores-restriccion-cinco-celdas-unico
   (restriccion (casillas ?i1 ?i2 ?i3 ?i4 ?i5))
   ?h <- (celda (id ?c1&?i1|?i2|?i3|?i4|?i5) (rango ?r $?r1 $?r2))
